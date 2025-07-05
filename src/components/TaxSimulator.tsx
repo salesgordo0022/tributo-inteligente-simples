@@ -83,18 +83,15 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
   const barData = results ? [
     {
       regime: 'Lucro Real',
-      total: results.lucroReal.total,
-      color: '#EF4444'
+      total: results.lucroReal.total
     },
     {
       regime: 'Lucro Presumido',
-      total: results.lucroPresumido.total,
-      color: '#F59E0B'
+      total: results.lucroPresumido.total
     },
     {
       regime: 'Simples Nacional',
-      total: results.simplesNacional.total,
-      color: '#10B981'
+      total: results.simplesNacional.total
     }
   ] : [];
 
@@ -325,7 +322,7 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
                   <XAxis dataKey="regime" />
                   <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR')}`} />
-                  <Bar dataKey="total" fill={(entry: any) => entry.color} />
+                  <Bar dataKey="total" fill="#8884d8" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

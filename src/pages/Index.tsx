@@ -1,16 +1,16 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Calculator, BarChart3, Brain, FileSpreadsheet, TrendingUp, Building2, Users, PieChart, Download } from 'lucide-react';
+import { Upload, Calculator, BarChart3, Brain, FileSpreadsheet, TrendingUp, Building2, Users, PieChart, Download, Settings } from 'lucide-react';
 import UploadSpreadsheet from '../components/UploadSpreadsheet';
 import TaxSimulator from '../components/TaxSimulator';
 import RegimeComparator from '../components/RegimeComparator';
 import SupplierAnalysis from '../components/SupplierAnalysis';
 import AIRecommendations from '../components/AIRecommendations';
 import ReportsGenerator from '../components/ReportsGenerator';
+import AIConfiguration from '../components/AIConfiguration';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -54,7 +54,7 @@ const Index = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white/50 backdrop-blur p-1 rounded-xl border">
+          <TabsList className="grid w-full grid-cols-7 bg-white/50 backdrop-blur p-1 rounded-xl border">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Dashboard</span>
@@ -78,6 +78,10 @@ const Index = () => {
             <TabsTrigger value="reports" className="flex items-center space-x-2">
               <Download className="h-4 w-4" />
               <span>Relatórios</span>
+            </TabsTrigger>
+            <TabsTrigger value="config" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Config IA</span>
             </TabsTrigger>
           </TabsList>
 
@@ -145,6 +149,10 @@ const Index = () => {
 
           <TabsContent value="reports">
             <ReportsGenerator data={companyData} />
+          </TabsContent>
+
+          <TabsContent value="config">
+            <AIConfiguration />
           </TabsContent>
         </Tabs>
       </div>
