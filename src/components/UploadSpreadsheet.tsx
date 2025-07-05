@@ -1,76 +1,55 @@
-
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, X } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { FileSpreadsheet, Upload, CheckCircle, AlertCircle, Download } from 'lucide-react';
 
 interface UploadSpreadsheetProps {
   onDataUpload: (data: any) => void;
 }
 
 const UploadSpreadsheet: React.FC<UploadSpreadsheetProps> = ({ onDataUpload }) => {
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>, type: string) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = (fileType: string) => {
+    setIsUploading(true);
+    setUploadProgress(0);
 
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      toast({
-        title: "Formato inválido",
-        description: "Por favor, envie apenas arquivos Excel (.xlsx ou .xls)",
-        variant: "destructive"
+    // Simular upload progressivo
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsUploading(false);
+          setUploadedFiles(prev => [...prev, fileType]);
+          
+          // Simular processamento dos dados
+          setTimeout(() => {
+            const mockData = {
+              revenue: 2450000,
+              costs: 1800000,
+              suppliers: 127,
+              products: 450,
+              transactions: 1250
+            };
+            onDataUpload(mockData);
+          }, 1000);
+          
+          return 100;
+        }
+        return prev + 10;
       });
-      return;
-    }
-
-    setIsProcessing(true);
-
-    // Simular processamento do arquivo
-    setTimeout(() => {
-      const newFile = {
-        id: Date.now(),
-        name: file.name,
-        type,
-        size: file.size,
-        status: 'success',
-        records: Math.floor(Math.random() * 1000) + 100
-      };
-
-      setUploadedFiles(prev => [...prev, newFile]);
-      setIsProcessing(false);
-
-      toast({
-        title: "Arquivo processado com sucesso!",
-        description: `${newFile.records} registros importados de ${type}`,
-      });
-
-      // Notificar componente pai sobre os dados
-      onDataUpload({ [type]: newFile });
-    }, 2000);
-  }, [onDataUpload, toast]);
-
-  const removeFile = (fileId: number) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }, 200);
   };
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+      <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Upload className="h-5 w-5 text-blue-600" />
+            <Upload className="h-5 w-5 text-gray-600" />
             <span>Importação de Dados</span>
           </CardTitle>
           <CardDescription>
@@ -84,32 +63,36 @@ const UploadSpreadsheet: React.FC<UploadSpreadsheetProps> = ({ onDataUpload }) =
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-lg flex items-center space-x-2">
-              <FileSpreadsheet className="h-5 w-5 text-green-600" />
+              <FileSpreadsheet className="h-5 w-5 text-gray-600" />
               <span>Produtos</span>
             </CardTitle>
             <CardDescription>
               NCM, CST, CFOP, origem dos produtos
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={(e) => handleFileUpload(e, 'produtos')}
-                className="hidden"
-                id="produtos-upload"
-              />
-              <label htmlFor="produtos-upload" className="cursor-pointer">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Clique para fazer upload</p>
-                <p className="text-xs text-gray-400">Excel (.xlsx)</p>
-              </label>
+          <CardContent className="space-y-4">
+            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Arraste arquivos ou clique para selecionar</p>
+              <p className="text-xs text-gray-500 mt-1">Excel, CSV (máx. 10MB)</p>
             </div>
-            <Button asChild className="w-full mt-4 bg-green-600 hover:bg-green-700">
-              <label htmlFor="produtos-upload" className="cursor-pointer">
-                Selecionar Arquivo
-              </label>
+            
+            <Button 
+              onClick={() => handleFileUpload('produtos')}
+              className="w-full bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900"
+              disabled={isUploading}
+            >
+              {uploadedFiles.includes('produtos') ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Produtos Importados
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar Produtos
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -118,106 +101,121 @@ const UploadSpreadsheet: React.FC<UploadSpreadsheetProps> = ({ onDataUpload }) =
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-lg flex items-center space-x-2">
-              <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+              <FileSpreadsheet className="h-5 w-5 text-gray-600" />
               <span>Fornecedores</span>
             </CardTitle>
             <CardDescription>
-              CNPJ, UF, dados dos fornecedores
+              Dados fiscais e tributários dos fornecedores
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={(e) => handleFileUpload(e, 'fornecedores')}
-                className="hidden"
-                id="fornecedores-upload"
-              />
-              <label htmlFor="fornecedores-upload" className="cursor-pointer">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Clique para fazer upload</p>
-                <p className="text-xs text-gray-400">Excel (.xlsx)</p>
-              </label>
+          <CardContent className="space-y-4">
+            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Arraste arquivos ou clique para selecionar</p>
+              <p className="text-xs text-gray-500 mt-1">Excel, CSV (máx. 10MB)</p>
             </div>
-            <Button asChild className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-              <label htmlFor="fornecedores-upload" className="cursor-pointer">
-                Selecionar Arquivo
-              </label>
+            
+            <Button 
+              onClick={() => handleFileUpload('fornecedores')}
+              className="w-full bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900"
+              disabled={isUploading}
+            >
+              {uploadedFiles.includes('fornecedores') ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Fornecedores Importados
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar Fornecedores
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Upload de Folha de Pagamento */}
+        {/* Upload de Transações */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="text-lg flex items-center space-x-2">
-              <FileSpreadsheet className="h-5 w-5 text-purple-600" />
-              <span>Folha de Pagamento</span>
+              <FileSpreadsheet className="h-5 w-5 text-gray-600" />
+              <span>Transações</span>
             </CardTitle>
             <CardDescription>
-              Salários, encargos, funcionários
+              Notas fiscais, vendas e compras
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={(e) => handleFileUpload(e, 'folha')}
-                className="hidden"
-                id="folha-upload"
-              />
-              <label htmlFor="folha-upload" className="cursor-pointer">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Clique para fazer upload</p>
-                <p className="text-xs text-gray-400">Excel (.xlsx)</p>
-              </label>
+          <CardContent className="space-y-4">
+            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Arraste arquivos ou clique para selecionar</p>
+              <p className="text-xs text-gray-500 mt-1">Excel, CSV (máx. 10MB)</p>
             </div>
-            <Button asChild className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
-              <label htmlFor="folha-upload" className="cursor-pointer">
-                Selecionar Arquivo
-              </label>
+            
+            <Button 
+              onClick={() => handleFileUpload('transacoes')}
+              className="w-full bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900"
+              disabled={isUploading}
+            >
+              {uploadedFiles.includes('transacoes') ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Transações Importadas
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar Transações
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Lista de Arquivos Carregados */}
+      {/* Progresso do Upload */}
+      {isUploading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Processando Upload</CardTitle>
+            <CardDescription>
+              Analisando dados e preparando análise
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Progress value={uploadProgress} className="w-full" />
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Progresso: {uploadProgress}%</span>
+              <span>{uploadProgress < 100 ? 'Processando...' : 'Concluído!'}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Status dos Uploads */}
       {uploadedFiles.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Arquivos Importados</CardTitle>
+            <CardTitle>Status dos Uploads</CardTitle>
             <CardDescription>
-              Dados carregados e prontos para análise
+              Arquivos processados com sucesso
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      {file.status === 'success' ? (
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5 text-red-600" />
-                      )}
-                    </div>
+                    <CheckCircle className="h-5 w-5 text-gray-600" />
                     <div>
-                      <p className="font-medium text-sm">{file.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {file.type} • {formatFileSize(file.size)} • {file.records} registros
-                      </p>
+                      <div className="font-medium text-gray-800 capitalize">{file}</div>
+                      <div className="text-sm text-gray-600">Processado com sucesso</div>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeFile(file.id)}
-                    className="text-gray-400 hover:text-red-600"
-                  >
-                    <X className="h-4 w-4" />
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar
                   </Button>
                 </div>
               ))}
@@ -226,16 +224,34 @@ const UploadSpreadsheet: React.FC<UploadSpreadsheetProps> = ({ onDataUpload }) =
         </Card>
       )}
 
-      {isProcessing && (
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-3">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-blue-700">Processando arquivo...</span>
+      {/* Dicas de Upload */}
+      <Card className="bg-gray-50 border-gray-200">
+        <CardHeader>
+          <CardTitle className="text-lg">Dicas para Upload</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-medium text-gray-800 mb-2">Formato dos Arquivos</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Excel (.xlsx, .xls)</li>
+                <li>• CSV (.csv)</li>
+                <li>• Tamanho máximo: 10MB</li>
+                <li>• Codificação: UTF-8</li>
+              </ul>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div>
+              <h4 className="font-medium text-gray-800 mb-2">Colunas Obrigatórias</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Código do produto/fornecedor</li>
+                <li>• Descrição</li>
+                <li>• Valor</li>
+                <li>• Data da transação</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,40 +1,55 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calculator, TrendingUp, TrendingDown, Equal } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Calculator, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface TaxSimulatorProps {
   data?: any;
 }
 
-const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
-  const [simulation, setSimulation] = useState({
-    revenue: '2450000',
-    activity: 'comercio',
-    state: 'SP',
-    employees: '25',
-    payroll: '180000'
-  });
+interface TaxResults {
+  lucroReal: {
+    irpj: number;
+    csll: number;
+    pis: number;
+    cofins: number;
+    icms: number;
+    total: number;
+  };
+  lucroPresumido: {
+    irpj: number;
+    csll: number;
+    pis: number;
+    cofins: number;
+    icms: number;
+    total: number;
+  };
+  simplesNacional: {
+    total: number;
+  };
+  bestOption: string;
+}
 
-  const [results, setResults] = useState<any>(null);
+const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
+  const [revenue, setRevenue] = useState(2450000);
+  const [costs, setCosts] = useState(1800000);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [results, setResults] = useState<TaxResults | null>(null);
 
   const calculateTaxes = () => {
     setIsCalculating(true);
     
+    // Simulação de cálculo
     setTimeout(() => {
-      const revenue = parseFloat(simulation.revenue);
+      const profit = revenue - costs;
       
-      // Simulação dos cálculos tributários
+      // Lucro Real
       const lucroReal = {
-        name: 'Lucro Real',
-        irpj: revenue * 0.15,
-        csll: revenue * 0.09,
+        irpj: profit * 0.15,
+        csll: profit * 0.09,
         pis: revenue * 0.0165,
         cofins: revenue * 0.076,
         icms: revenue * 0.18,
@@ -42,42 +57,45 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
       };
       lucroReal.total = lucroReal.irpj + lucroReal.csll + lucroReal.pis + lucroReal.cofins + lucroReal.icms;
 
+      // Lucro Presumido
       const lucroPresumido = {
-        name: 'Lucro Presumido',
-        irpj: revenue * 0.048,
-        csll: revenue * 0.0288,
-        pis: revenue * 0.0065,
-        cofins: revenue * 0.03,
+        irpj: revenue * 0.15 * 0.32,
+        csll: revenue * 0.09 * 0.32,
+        pis: revenue * 0.0165,
+        cofins: revenue * 0.076,
         icms: revenue * 0.18,
         total: 0
       };
       lucroPresumido.total = lucroPresumido.irpj + lucroPresumido.csll + lucroPresumido.pis + lucroPresumido.cofins + lucroPresumido.icms;
 
+      // Simples Nacional
       const simplesNacional = {
-        name: 'Simples Nacional',
-        das: revenue * 0.088,
         total: revenue * 0.088
       };
+
+      // Determinar melhor opção
+      const totals = [lucroReal.total, lucroPresumido.total, simplesNacional.total];
+      const minTotal = Math.min(...totals);
+      let bestOption = 'real';
+      if (minTotal === lucroPresumido.total) bestOption = 'presumido';
+      if (minTotal === simplesNacional.total) bestOption = 'simples';
 
       setResults({
         lucroReal,
         lucroPresumido,
         simplesNacional,
-        bestOption: lucroPresumido.total < lucroReal.total && lucroPresumido.total < simplesNacional.total ? 'presumido' :
-                   simplesNacional.total < lucroReal.total ? 'simples' : 'real',
-        savings: Math.min(lucroReal.total, lucroPresumido.total, simplesNacional.total)
+        bestOption
       });
-      
       setIsCalculating(false);
-    }, 1500);
+    }, 2000);
   };
 
   const pieData = results ? [
-    { name: 'IRPJ', value: results.lucroReal.irpj, color: '#3B82F6' },
-    { name: 'CSLL', value: results.lucroReal.csll, color: '#10B981' },
-    { name: 'PIS', value: results.lucroReal.pis, color: '#F59E0B' },
-    { name: 'COFINS', value: results.lucroReal.cofins, color: '#EF4444' },
-    { name: 'ICMS', value: results.lucroReal.icms, color: '#8B5CF6' }
+    { name: 'IRPJ', value: results.lucroReal.irpj, color: '#6B7280' },
+    { name: 'CSLL', value: results.lucroReal.csll, color: '#9CA3AF' },
+    { name: 'PIS', value: results.lucroReal.pis, color: '#D1D5DB' },
+    { name: 'COFINS', value: results.lucroReal.cofins, color: '#E5E7EB' },
+    { name: 'ICMS', value: results.lucroReal.icms, color: '#F3F4F6' }
   ] : [];
 
   const barData = results ? [
@@ -97,10 +115,10 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+      <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calculator className="h-5 w-5 text-blue-600" />
+            <Calculator className="h-5 w-5 text-gray-600" />
             <span>Simulador Tributário</span>
           </CardTitle>
           <CardDescription>
@@ -110,84 +128,49 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Formulário de Simulação */}
+        {/* Formulário de entrada */}
         <Card>
           <CardHeader>
             <CardTitle>Dados da Empresa</CardTitle>
             <CardDescription>
-              Informe os dados básicos para simulação
+              Informe os valores para calcular os tributos
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="revenue">Receita Bruta Anual (R$)</Label>
+              <Label htmlFor="revenue">Receita Bruta Anual</Label>
               <Input
                 id="revenue"
                 type="number"
-                value={simulation.revenue}
-                onChange={(e) => setSimulation(prev => ({ ...prev, revenue: e.target.value }))}
-                placeholder="2.450.000"
+                value={revenue}
+                onChange={(e) => setRevenue(Number(e.target.value))}
+                placeholder="Digite a receita bruta"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="costs">Custos e Despesas</Label>
+              <Input
+                id="costs"
+                type="number"
+                value={costs}
+                onChange={(e) => setCosts(Number(e.target.value))}
+                placeholder="Digite os custos e despesas"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="activity">Atividade Principal</Label>
-              <Select value={simulation.activity} onValueChange={(value) => setSimulation(prev => ({ ...prev, activity: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a atividade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="comercio">Comércio</SelectItem>
-                  <SelectItem value="industria">Indústria</SelectItem>
-                  <SelectItem value="servicos">Serviços</SelectItem>
-                  <SelectItem value="construcao">Construção Civil</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state">Estado</Label>
-              <Select value={simulation.state} onValueChange={(value) => setSimulation(prev => ({ ...prev, state: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SP">São Paulo</SelectItem>
-                  <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                  <SelectItem value="MG">Minas Gerais</SelectItem>
-                  <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                  <SelectItem value="PR">Paraná</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="employees">Funcionários</Label>
-                <Input
-                  id="employees"
-                  type="number"
-                  value={simulation.employees}
-                  onChange={(e) => setSimulation(prev => ({ ...prev, employees: e.target.value }))}
-                  placeholder="25"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="payroll">Folha Anual (R$)</Label>
-                <Input
-                  id="payroll"
-                  type="number"
-                  value={simulation.payroll}
-                  onChange={(e) => setSimulation(prev => ({ ...prev, payroll: e.target.value }))}
-                  placeholder="180.000"
-                />
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Lucro Estimado:</span>
+                <span className="font-semibold text-gray-800">
+                  R$ {(revenue - costs).toLocaleString('pt-BR')}
+                </span>
               </div>
             </div>
 
             <Button 
               onClick={calculateTaxes}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="w-full bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900"
               disabled={isCalculating}
             >
               {isCalculating ? (
@@ -214,67 +197,42 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
                 Comparação entre os regimes tributários
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Lucro Real */}
-                <div className="p-4 border rounded-lg bg-red-50 border-red-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold text-red-700">Lucro Real</h3>
-                    <span className="text-lg font-bold text-red-700">
-                      R$ {results.lucroReal.total.toLocaleString('pt-BR')}
-                    </span>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-lg font-bold text-gray-800">
+                    R$ {results.lucroReal.total.toLocaleString('pt-BR')}
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-red-600">
-                    <div>IRPJ: R$ {results.lucroReal.irpj.toLocaleString('pt-BR')}</div>
-                    <div>CSLL: R$ {results.lucroReal.csll.toLocaleString('pt-BR')}</div>
-                    <div>PIS: R$ {results.lucroReal.pis.toLocaleString('pt-BR')}</div>
-                    <div>COFINS: R$ {results.lucroReal.cofins.toLocaleString('pt-BR')}</div>
-                  </div>
+                  <div className="text-sm text-gray-600">Lucro Real</div>
                 </div>
+                
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-lg font-bold text-gray-800">
+                    R$ {results.lucroPresumido.total.toLocaleString('pt-BR')}
+                  </div>
+                  <div className="text-sm text-gray-600">Lucro Presumido</div>
+                </div>
+                
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-lg font-bold text-gray-800">
+                    R$ {results.simplesNacional.total.toLocaleString('pt-BR')}
+                  </div>
+                  <div className="text-sm text-gray-600">Simples Nacional</div>
+                </div>
+              </div>
 
-                {/* Lucro Presumido */}
-                <div className="p-4 border rounded-lg bg-orange-50 border-orange-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold text-orange-700">Lucro Presumido</h3>
-                    <span className="text-lg font-bold text-orange-700">
-                      R$ {results.lucroPresumido.total.toLocaleString('pt-BR')}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-orange-600">
-                    <div>IRPJ: R$ {results.lucroPresumido.irpj.toLocaleString('pt-BR')}</div>
-                    <div>CSLL: R$ {results.lucroPresumido.csll.toLocaleString('pt-BR')}</div>
-                    <div>PIS: R$ {results.lucroPresumido.pis.toLocaleString('pt-BR')}</div>
-                    <div>COFINS: R$ {results.lucroPresumido.cofins.toLocaleString('pt-BR')}</div>
-                  </div>
+              <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <TrendingUp className="h-5 w-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-800">Melhor Opção</h3>
                 </div>
-
-                {/* Simples Nacional */}
-                <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-green-700">Simples Nacional</h3>
-                    <span className="text-lg font-bold text-green-700">
-                      R$ {results.simplesNacional.total.toLocaleString('pt-BR')}
-                    </span>
-                  </div>
-                  <div className="text-xs text-green-600 mt-2">
-                    DAS: R$ {results.simplesNacional.das.toLocaleString('pt-BR')}
-                  </div>
-                </div>
-
-                {/* Recomendação */}
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    <h3 className="font-semibold text-gray-800">Melhor Opção</h3>
-                  </div>
-                  <p className="text-green-700 font-medium">
-                    {results.bestOption === 'simples' ? 'Simples Nacional' :
-                     results.bestOption === 'presumido' ? 'Lucro Presumido' : 'Lucro Real'}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Economia potencial de R$ {(Math.max(...[results.lucroReal.total, results.lucroPresumido.total, results.simplesNacional.total]) - Math.min(...[results.lucroReal.total, results.lucroPresumido.total, results.simplesNacional.total])).toLocaleString('pt-BR')} anuais
-                  </p>
-                </div>
+                <p className="text-gray-700 font-medium">
+                  {results.bestOption === 'simples' ? 'Simples Nacional' :
+                   results.bestOption === 'presumido' ? 'Lucro Presumido' : 'Lucro Real'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Economia potencial de R$ {(Math.max(...[results.lucroReal.total, results.lucroPresumido.total, results.simplesNacional.total]) - Math.min(...[results.lucroReal.total, results.lucroPresumido.total, results.simplesNacional.total])).toLocaleString('pt-BR')} anuais
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -286,8 +244,7 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Composição dos Tributos</CardTitle>
-              <CardDescription>Lucro Real - Distribuição por imposto</CardDescription>
+              <CardTitle>Composição dos Tributos (Lucro Real)</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -296,15 +253,17 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
+                    labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
                   >
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                  <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -313,16 +272,15 @@ const TaxSimulator: React.FC<TaxSimulatorProps> = ({ data }) => {
           <Card>
             <CardHeader>
               <CardTitle>Comparação entre Regimes</CardTitle>
-              <CardDescription>Total de tributos por regime</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={barData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="regime" />
-                  <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR')}`} />
-                  <Bar dataKey="total" fill="#8884d8" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#6B7280" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -128,7 +127,7 @@ const AIConfiguration: React.FC = () => {
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Settings className="h-5 w-5 text-blue-600" />
+          <Settings className="h-5 w-5 text-gray-600" />
           <span>Configuração da IA</span>
         </CardTitle>
         <CardDescription>
@@ -140,7 +139,7 @@ const AIConfiguration: React.FC = () => {
         {/* Status da Configuração */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center space-x-3">
-            <Brain className="h-5 w-5 text-purple-600" />
+            <Brain className="h-5 w-5 text-gray-600" />
             <div>
               <p className="font-medium">Status da IA</p>
               <p className="text-sm text-gray-600">Estado atual da integração</p>
@@ -210,7 +209,7 @@ const AIConfiguration: React.FC = () => {
           <Button 
             onClick={handleSaveConfig}
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 bg-gray-600 hover:bg-gray-700"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
@@ -232,7 +231,7 @@ const AIConfiguration: React.FC = () => {
           >
             {isTesting ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                 <span>Testando...</span>
               </div>
             ) : (
@@ -253,9 +252,9 @@ const AIConfiguration: React.FC = () => {
         </div>
 
         {/* Instruções */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Como configurar:</h4>
-          <ol className="text-sm text-blue-700 space-y-1">
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <h4 className="font-medium text-gray-900 mb-2">Como configurar:</h4>
+          <ol className="text-sm text-gray-700 space-y-1">
             <li>1. Obtenha sua API key do provedor de IA</li>
             <li>2. Insira a URL base da API (ex: https://api.openai.com/v1)</li>
             <li>3. Clique em "Salvar Configuração"</li>

@@ -22,24 +22,24 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50">
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-blue-600 to-green-600 p-2 rounded-lg">
+              <div className="bg-gradient-to-r from-gray-800 to-black p-2 rounded-lg">
                 <Calculator className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
                   TaxOptimizer Pro
                 </h1>
                 <p className="text-sm text-gray-600">Sistema Inteligente de Planejamento Tributário</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="text-green-700 border-green-300">
+              <Badge variant="outline" className="text-gray-700 border-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 Economia Identificada: R$ 125.000
               </Badge>
@@ -54,7 +54,7 @@ const Index = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-white/50 backdrop-blur p-1 rounded-xl border">
+          <TabsList className="grid w-full grid-cols-7 bg-white/80 backdrop-blur p-1 rounded-xl border border-gray-200">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Dashboard</span>
@@ -87,43 +87,43 @@ const Index = () => {
 
           <TabsContent value="dashboard" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+              <Card className="bg-gradient-to-br from-gray-700 to-gray-800 text-white border-0">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Receita Bruta Anual</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">R$ 2.450.000</div>
-                  <p className="text-blue-100 text-sm">+12% vs ano anterior</p>
+                  <p className="text-gray-300 text-sm">+12% vs ano anterior</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+              <Card className="bg-gradient-to-br from-gray-600 to-gray-700 text-white border-0">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Economia Potencial</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">R$ 125.000</div>
-                  <p className="text-green-100 text-sm">5.1% da receita bruta</p>
+                  <p className="text-gray-300 text-sm">5.1% da receita bruta</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+              <Card className="bg-gradient-to-br from-gray-800 to-black text-white border-0">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Regime Atual</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">Lucro Real</div>
-                  <p className="text-purple-100 text-sm">Alíquota efetiva: 24.5%</p>
+                  <p className="text-gray-300 text-sm">Alíquota efetiva: 24.5%</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
+              <Card className="bg-gradient-to-br from-gray-500 to-gray-600 text-white border-0">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Fornecedores</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">127</div>
-                  <p className="text-orange-100 text-sm">15 com alto impacto fiscal</p>
+                  <p className="text-gray-300 text-sm">15 com alto impacto fiscal</p>
                 </CardContent>
               </Card>
             </div>
