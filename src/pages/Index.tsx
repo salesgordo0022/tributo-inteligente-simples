@@ -11,6 +11,7 @@ import SupplierAnalysis from '../components/SupplierAnalysis';
 import AIRecommendations from '../components/AIRecommendations';
 import ReportsGenerator from '../components/ReportsGenerator';
 import AIConfiguration from '../components/AIConfiguration';
+import TaxConfiguration from '../components/TaxConfiguration';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -54,7 +55,7 @@ const Index = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-white/80 backdrop-blur p-1 rounded-xl border border-gray-200">
+          <TabsList className="grid w-full grid-cols-8 bg-white/80 backdrop-blur p-1 rounded-xl border border-gray-200">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <BarChart3 className="h-4 w-4" />
               <span>Dashboard</span>
@@ -82,6 +83,10 @@ const Index = () => {
             <TabsTrigger value="config" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
               <span>Config IA</span>
+            </TabsTrigger>
+            <TabsTrigger value="tax-config" className="flex items-center space-x-2">
+              <PieChart className="h-4 w-4" />
+              <span>Alíquotas</span>
             </TabsTrigger>
           </TabsList>
 
@@ -153,6 +158,10 @@ const Index = () => {
 
           <TabsContent value="config">
             <AIConfiguration />
+          </TabsContent>
+
+          <TabsContent value="tax-config">
+            <TaxConfiguration />
           </TabsContent>
         </Tabs>
       </div>
